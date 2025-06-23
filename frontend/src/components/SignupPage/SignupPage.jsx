@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "./SignupPage.css";
-import { FaUser, FaLock } from "react-icons/fa";
-import { MdOutlineEmail } from "react-icons/md";
+import { FaUser, FaLock, FaEnvelope } from "react-icons/fa";
 import { validateSignupForm } from "../../utils/validation"; // Import the validation logic
 import axios from "axios";
 
@@ -64,7 +63,7 @@ const SignupPage = () => {
             value={formData.email}
             onChange={handleChange}
           />
-          <MdOutlineEmail className="icon" />
+          <FaEnvelope className="icon" />
           {errors.email && <p className="error">{errors.email}</p>}
         </div>
 
