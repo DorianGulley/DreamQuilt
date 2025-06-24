@@ -45,10 +45,13 @@
 .profile-actions {
   display: flex;
   gap: 0.5rem;
+  flex-direction: row;
 }
 
-.follow-btn,
-.edit-profile-btn {
+.logout-profile-btn {
+  background: #ff4444;
+  color: #fff;
+  border: none;
   padding: 0.5rem 1rem;
   border-radius: 8px;
   font-weight: 600;
@@ -56,18 +59,30 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  transition: all 0.3s ease;
-  border: none;
+  transition: background 0.3s ease, color 0.3s ease;
+  margin-right: 0.5rem;
 }
 
-.follow-btn {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
+.logout-profile-btn:hover {
+  background: #d32f2f;
 }
 
 .edit-profile-btn {
   background: #f0f0f0;
   color: #333;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: none;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.edit-profile-btn:hover {
+  background: #e0e0e0;
 }
 
 .profile-stats {
@@ -183,4 +198,25 @@
   border-radius: 8px;
   margin-top: 0.5rem;
   border-left: 3px solid #667eea;
+}
+
+.follow-btn {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background 0.3s, box-shadow 0.3s, color 0.3s;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15);
+}
+
+.follow-btn:hover {
+  background: linear-gradient(135deg, #5a67d8, #6b21a8);
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.25);
 }

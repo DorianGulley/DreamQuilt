@@ -5,7 +5,6 @@ import {
   FaSearch,
   FaPlus,
   FaUser,
-  FaSignOutAlt,
   FaHeart,
   FaComment,
   FaShare,
@@ -13,76 +12,40 @@ import {
   FaPalette,
   FaLightbulb,
 } from "react-icons/fa";
+import { useUser } from "../../context/UserContext";
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+  const { user } = useUser();
   const [quilts, setQuilts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
 
-  // Mock data for demonstration - replace with actual API calls
   useEffect(() => {
-    // Simulate fetching user data
-    const userData = localStorage.getItem("user");
-    if (userData) {
-      setUser(JSON.parse(userData));
-    }
-
-    // Mock quilts data
-    const mockQuilts = [
-      {
-        id: 1,
-        title: "The Last City in the Sky",
-        author: "Alex Chen",
-        content:
-          "A floating metropolis where the wealthy live above the clouds while the poor struggle in the polluted depths below. The city's energy source is failing, and only a young engineer from the depths can save it.",
-        category: "sci-fi",
-        likes: 24,
-        comments: 8,
-        shares: 3,
-        timestamp: "2 hours ago",
-        tags: ["floating city", "class divide", "energy crisis"],
-      },
-      {
-        id: 2,
-        title: "Whispers of the Ancient Forest",
-        author: "Maya Rodriguez",
-        content:
-          "Deep in an enchanted forest, trees communicate through a network of roots and fungi. A young botanist discovers she can hear their conversations and learns of an ancient threat awakening beneath the earth.",
-        category: "fantasy",
-        likes: 31,
-        comments: 12,
-        shares: 5,
-        timestamp: "5 hours ago",
-        tags: ["enchanted forest", "nature magic", "ancient threat"],
-      },
-      {
-        id: 3,
-        title: "The Memory Thief",
-        author: "Jordan Kim",
-        content:
-          "In a world where memories can be extracted and sold, a detective with no memories of her own must solve the case of disappearing childhoods while uncovering her own forgotten past.",
-        category: "mystery",
-        likes: 18,
-        comments: 6,
-        shares: 2,
-        timestamp: "1 day ago",
-        tags: ["memory manipulation", "detective", "identity"],
-      },
-    ];
-    setQuilts(mockQuilts);
+    // Fetch quilts from backend
+    fetch("http://localhost:4000/quilts")
+      .then((res) => res.json())
+      .then((data) => setQuilts(data))
+      .catch((err) => {
+        console.error("Failed to fetch quilts:", err);
+        setQuilts([]);
+      });
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    navigate("/");
+  const handleCreateQuilt = () => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    navigate("/create-quilt");
   };
 
-  const handleCreateQuilt = () => {
-    // Navigate to quilt creation page
-    navigate("/create-quilt");
+  const handleUserButton = () => {
+    if (user) {
+      navigate(`/profile/${user.username}`);
+    } else {
+      navigate("/login");
+    }
   };
 
   const filteredQuilts = quilts.filter((quilt) => {
@@ -126,15 +89,15 @@ const HomePage = () => {
 
           <div className="user-controls">
             <button className="create-quilt-btn" onClick={handleCreateQuilt}>
-              <FaPlus /> Create Quilt
+              <FaPlus /> New Quilt
             </button>
-            <div className="user-menu">
-              <FaUser className="user-icon" />
-              <span>{user?.username || "User"}</span>
-              <button className="logout-btn" onClick={handleLogout}>
-                <FaSignOutAlt />
-              </button>
-            </div>
+            <button
+              className="user-profile-btn create-quilt-btn"
+              onClick={handleUserButton}
+            >
+              <FaUser className="user-icon-white" />
+              {user ? user.username : "Log In"}
+            </button>
           </div>
         </div>
       </header>

@@ -2,9 +2,11 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom"; // Import the useNavigate hook
 import "./LoginPage.css";
 import { FaUser, FaLock } from "react-icons/fa";
+import { useUser } from "../../context/UserContext";
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const { login } = useUser();
   const [formData, setFormData] = useState({
     usernameOrEmail: "",
     password: "",
@@ -33,9 +35,9 @@ const LoginPage = () => {
         return;
       }
 
-      // Handle successful login (e.g., save user info to localStorage or context)
-      console.log("Login successful:", data);
-      navigate("/home"); // Redirect to homepage or dashboard
+      // Save user info to context and localStorage
+      login(data.user || { username: formData.usernameOrEmail });
+      navigate("/home");
     } catch (err) {
       console.error("Error logging in:", err);
       setError("Failed to login. Please try again.");

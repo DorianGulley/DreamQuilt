@@ -502,3 +502,11 @@
     gap: 0.5rem;
   }
 }
+
+.user-profile-btn {
+  margin-left: 0.5rem;
+}
+
+.user-icon-white {
+  color: #fff !important;
+}
