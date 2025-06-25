@@ -51,6 +51,74 @@
   font-weight: 700;
 }
 
+/* Progress Bar */
+.progress-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 15px;
+}
+
+.progress-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.step-number {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #e9ecef;
+  color: #6c757d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+}
+
+.step-number.active {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.step-title {
+  font-size: 0.9rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.progress-line {
+  width: 60px;
+  height: 2px;
+  background: #e9ecef;
+  margin: 0 1rem;
+}
+
+/* Step Content */
+.step-content {
+  margin-bottom: 2rem;
+}
+
+.step-content h2 {
+  color: #333;
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.step-description {
+  color: #666;
+  margin-bottom: 2rem;
+  font-size: 1rem;
+}
+
 .quilt-form {
   display: flex;
   flex-direction: column;
@@ -107,29 +175,172 @@
   margin-top: 0.25rem;
 }
 
+/* Structure Options */
+.structure-options {
+  display: grid;
+  gap: 1rem;
+}
+
+.structure-option {
+  border: 2px solid #e1e5e9;
+  border-radius: 10px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.structure-option:hover {
+  border-color: #667eea;
+  background: #f8f9ff;
+}
+
+.structure-option.selected {
+  border-color: #667eea;
+  background: linear-gradient(
+    135deg,
+    rgba(102, 126, 234, 0.1),
+    rgba(118, 75, 162, 0.1)
+  );
+}
+
+.structure-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.structure-header input[type="radio"] {
+  accent-color: #667eea;
+}
+
+.structure-label {
+  font-weight: 600;
+  color: #333;
+}
+
+.structure-description {
+  color: #666;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* Patch Types Grid */
+.patch-types-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.patch-type-option {
+  border: 2px solid #e1e5e9;
+  border-radius: 10px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.patch-type-option:hover {
+  border-color: #667eea;
+  background: #f8f9ff;
+}
+
+.patch-type-option.selected {
+  border-color: #667eea;
+  background: linear-gradient(
+    135deg,
+    rgba(102, 126, 234, 0.1),
+    rgba(118, 75, 162, 0.1)
+  );
+}
+
+.patch-type-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.patch-type-header input[type="checkbox"] {
+  accent-color: #667eea;
+}
+
+.patch-type-label {
+  font-weight: 600;
+  color: #333;
+}
+
+.patch-type-description {
+  color: #666;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* Privacy Settings */
+.privacy-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+}
+
+.privacy-label input[type="checkbox"] {
+  accent-color: #667eea;
+}
+
+.privacy-text {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Navigation Buttons */
 .form-actions {
   display: flex;
   gap: 1rem;
-  justify-content: flex-end;
-  margin-top: 1rem;
+  justify-content: space-between;
+  margin-top: 2rem;
   padding-top: 1rem;
   border-top: 2px solid #f0f0f0;
 }
 
-.cancel-btn {
-  background: #f8f9fa;
-  color: #666;
-  border: 2px solid #e1e5e9;
+.nav-btn {
   padding: 0.75rem 1.5rem;
   border-radius: 10px;
   font-weight: 600;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   transition: all 0.3s ease;
+  border: none;
+  font-size: 1rem;
 }
 
-.cancel-btn:hover {
+.prev-btn {
+  background: #f8f9fa;
+  color: #666;
+  border: 2px solid #e1e5e9;
+}
+
+.prev-btn:hover {
   background: #e9ecef;
   border-color: #adb5bd;
+}
+
+.next-btn {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.next-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
 .submit-btn {
@@ -158,6 +369,132 @@
   transform: none;
 }
 
+/* ReactQuill Custom Styling */
+.quill {
+  background: white;
+  border-radius: 10px;
+  border: 2px solid #e1e5e9;
+  transition: all 0.3s ease;
+}
+
+.quill:focus-within {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.ql-toolbar {
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  border-bottom: 1px solid #e1e5e9;
+  background: #f8f9fa;
+}
+
+.ql-container {
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  min-height: 200px;
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+.ql-editor {
+  min-height: 200px;
+  padding: 1rem;
+  line-height: 1.6;
+}
+
+.ql-editor p {
+  margin-bottom: 0.5rem;
+}
+
+.ql-editor h1,
+.ql-editor h2,
+.ql-editor h3 {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.ql-editor blockquote {
+  border-left: 4px solid #667eea;
+  margin: 1rem 0;
+  padding-left: 1rem;
+  color: #666;
+  font-style: italic;
+}
+
+.ql-editor code {
+  background: #f8f9fa;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-family: "Courier New", monospace;
+}
+
+.ql-editor pre {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+.ql-editor a {
+  color: #667eea;
+  text-decoration: underline;
+}
+
+.ql-editor a:hover {
+  color: #764ba2;
+}
+
+/* Toolbar button styling */
+.ql-toolbar button {
+  color: #333;
+}
+
+.ql-toolbar button:hover {
+  color: #667eea;
+}
+
+.ql-toolbar .ql-active {
+  color: #667eea;
+}
+
+.ql-toolbar .ql-stroke {
+  stroke: currentColor;
+}
+
+.ql-toolbar .ql-fill {
+  fill: currentColor;
+}
+
+.ql-toolbar .ql-picker {
+  color: #333;
+}
+
+.ql-toolbar .ql-picker-options {
+  background: white;
+  border: 1px solid #e1e5e9;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive adjustments for ReactQuill */
+@media (max-width: 768px) {
+  .ql-toolbar {
+    padding: 0.5rem;
+  }
+
+  .ql-editor {
+    padding: 0.75rem;
+    min-height: 150px;
+  }
+
+  .ql-container {
+    min-height: 150px;
+  }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .create-quilt-page {
@@ -178,11 +515,26 @@
     font-size: 1.5rem;
   }
 
+  .progress-bar {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .progress-line {
+    width: 2px;
+    height: 30px;
+    margin: 0;
+  }
+
+  .patch-types-grid {
+    grid-template-columns: 1fr;
+  }
+
   .form-actions {
     flex-direction: column;
   }
 
-  .cancel-btn,
+  .nav-btn,
   .submit-btn {
     width: 100%;
     justify-content: center;
