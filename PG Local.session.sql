@@ -1,106 +1,34 @@
--- Insert quilt tags
-INSERT INTO quilt_tags (quilt_id, tag)
-VALUES (
-        (
-            SELECT id
-            FROM quilts
-            WHERE title = 'The Last City in the Sky'
-        ),
-        'floating city'
-    ),
-    (
-        (
-            SELECT id
-            FROM quilts
-            WHERE title = 'The Last City in the Sky'
-        ),
-        'class divide'
-    ),
-    (
-        (
-            SELECT id
-            FROM quilts
-            WHERE title = 'The Last City in the Sky'
-        ),
-        'energy crisis'
-    ),
-    (
-        (
-            SELECT id
-            FROM quilts
-            WHERE title = 'Whispers of the Ancient Forest'
-        ),
-        'enchanted forest'
-    ),
-    (
-        (
-            SELECT id
-            FROM quilts
-            WHERE title = 'Whispers of the Ancient Forest'
-        ),
-        'nature magic'
-    ),
-    (
-        (
-            SELECT id
-            FROM quilts
-            WHERE title = 'Whispers of the Ancient Forest'
-        ),
-        'ancient threat'
-    ),
-    (
-        (
-            SELECT id
-            FROM quilts
-            WHERE title = 'The Memory Thief'
-        ),
-        'memory manipulation'
-    ),
-    (
-        (
-            SELECT id
-            FROM quilts
-            WHERE title = 'The Memory Thief'
-        ),
-        'detective'
-    ),
-    (
-        (
-            SELECT id
-            FROM quilts
-            WHERE title = 'The Memory Thief'
-        ),
-        'identity'
-    );
--- Insert mock contributions (optional, for future use)
-INSERT INTO contributions (quilt_id, user_id, type, content)
-VALUES (
-        (
-            SELECT id
-            FROM quilts
-            WHERE title = 'Whispers of the Ancient Forest'
-        ),
-        (
-            SELECT id
-            FROM users
-            WHERE username = 'alexchen'
-        ),
-        'plot_twist',
-        'The ancient threat is revealed to be a sentient, crystalline entity that feeds on memories.'
-    ),
-    (
-        (
-            SELECT id
-            FROM quilts
-            WHERE title = 'The Memory Thief'
-        ),
-        (
-            SELECT id
-            FROM users
-            WHERE username = 'alexchen'
-        ),
-        'character_art',
-        'Concept art for the protagonist, a detective with glowing, empty eyes.'
-    );
 SELECT *
-FROM follows;
+FROM contributions;
+DROP TABLE contributions;
+-- Create patches table
+CREATE TABLE IF NOT EXISTS patches (
+  id SERIAL PRIMARY KEY,
+  quilt_id INTEGER REFERENCES quilts(id) ON DELETE CASCADE,
+  user_id INTEGER REFERENCES users(id) ON DELETE
+  SET NULL,
+    title VARCHAR(255) NOT NULL,
+    content_html TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    is_published BOOLEAN DEFAULT TRUE
+);
+-- Create patch_images table
+CREATE TABLE IF NOT EXISTS patch_images (
+  id SERIAL PRIMARY KEY,
+  patch_id INTEGER REFERENCES patches(id) ON DELETE CASCADE,
+  url TEXT NOT NULL,
+  caption TEXT
+);
+-- Create patch_links table
+CREATE TABLE IF NOT EXISTS patch_links (
+  id SERIAL PRIMARY KEY,
+  from_patch_id INTEGER REFERENCES patches(id) ON DELETE CASCADE,
+  to_patch_id INTEGER REFERENCES patches(id) ON DELETE CASCADE,
+  relationship_type VARCHAR(100)
+);
+-- Create patch_tags table
+CREATE TABLE IF NOT EXISTS patch_tags (
+  id SERIAL PRIMARY KEY,
+  patch_id INTEGER REFERENCES patches(id) ON DELETE CASCADE,
+  name VARCHAR(50) NOT NULL
+);

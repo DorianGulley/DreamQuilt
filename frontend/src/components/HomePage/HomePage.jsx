@@ -14,6 +14,17 @@ import {
 } from "react-icons/fa";
 import { useUser } from "../../context/UserContext";
 
+// Utility to strip HTML tags and convert to plain text
+const stripHtml = (html) =>
+  html
+    .replace(/<[^>]*>/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+// Utility to truncate text with ellipses
+const truncate = (text, maxLength = 300) =>
+  text.length > maxLength ? text.slice(0, maxLength) + "…" : text;
+
 const HomePage = () => {
   const navigate = useNavigate();
   const { user } = useUser();
@@ -51,7 +62,7 @@ const HomePage = () => {
   const filteredQuilts = quilts.filter((quilt) => {
     const matchesSearch =
       quilt.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      quilt.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      quilt.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       quilt.tags.some((tag) =>
         tag.toLowerCase().includes(searchTerm.toLowerCase())
       );
@@ -165,11 +176,20 @@ const HomePage = () => {
               {filteredQuilts.map((quilt) => (
                 <article key={quilt.id} className="quilt-card">
                   <div className="quilt-header">
-                    <h4>{quilt.title}</h4>
+                    <h4>
+                      <Link
+                        to={`/quilt/${quilt.id}`}
+                        className="quilt-title-link"
+                      >
+                        {quilt.title}
+                      </Link>
+                    </h4>
                     <span className="quilt-category">{quilt.category}</span>
                   </div>
 
-                  <p className="quilt-content">{quilt.content}</p>
+                  <p className="quilt-content">
+                    {truncate(stripHtml(quilt.description))}
+                  </p>
 
                   <div className="quilt-tags">
                     {quilt.tags.map((tag) => (
@@ -210,12 +230,6 @@ const HomePage = () => {
             {filteredQuilts.length === 0 && (
               <div className="no-quilts">
                 <p>No quilts found matching your criteria.</p>
-                <button
-                  className="create-quilt-btn"
-                  onClick={handleCreateQuilt}
-                >
-                  <FaPlus /> Create the first quilt!
-                </button>
               </div>
             )}
           </section>

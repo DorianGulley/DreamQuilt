@@ -74,7 +74,7 @@ app.get('/quilts', async (req, res) => {
       // Get all quilts with author username
       const quiltsResult = await pool.query(`
         SELECT 
-          q.id, q.title, q.content, q.category, q.created_at, 
+          q.id, q.title, q.description, q.category, q.created_at, 
           u.username AS author
         FROM quilts q
         JOIN users u ON q.user_id = u.id
@@ -160,7 +160,7 @@ app.get('/users/:username/quilts', async (req, res) => {
 
     // Get quilts
     const quiltsResult = await pool.query(
-      'SELECT id, title, content, category, created_at FROM quilts WHERE user_id = $1 ORDER BY created_at DESC',
+      'SELECT id, title, description, category, created_at FROM quilts WHERE user_id = $1 ORDER BY created_at DESC',
       [userId]
     );
     const quilts = quiltsResult.rows;
@@ -190,6 +190,154 @@ app.get('/users/:username/quilts', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to fetch user quilts' });
+  }
+});
+
+// Endpoint to create a new quilt
+app.post('/quilts', async (req, res) => {
+  try {
+    const { title, description, category, structure, isPublic, tags, creatorId } = req.body;
+
+    // Insert the new quilt into the quilts table
+    const quiltResult = await pool.query(
+      `INSERT INTO quilts (user_id, title, description, category, structure, public, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
+       RETURNING *`,
+      [creatorId, title, description, category, structure, isPublic]
+    );
+    const quilt = quiltResult.rows[0];
+
+    // Insert tags into quilt_tags table
+    if (Array.isArray(tags) && tags.length > 0) {
+      const tagInserts = tags.map(tag =>
+        pool.query(
+          'INSERT INTO quilt_tags (quilt_id, tag) VALUES ($1, $2)',
+          [quilt.id, tag]
+        )
+      );
+      await Promise.all(tagInserts);
+    }
+
+    // Attach tags to the response
+    quilt.tags = tags || [];
+
+    res.status(201).json(quilt);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to create quilt' });
+  }
+});
+
+// Get all patches for a particular quilt, including links
+app.get('/quilts/:quiltId/patches', async (req, res) => {
+  try {
+    const { quiltId } = req.params;
+
+    const patchesResult = await pool.query(
+      `SELECT p.id, p.title, p.content_html, p.created_at, p.is_published, u.username AS author
+       FROM patches p
+       JOIN users u ON p.user_id = u.id
+       WHERE p.quilt_id = $1
+       ORDER BY p.created_at ASC`,
+      [quiltId]
+    );
+    const patches = patchesResult.rows;
+
+    const patchIds = patches.map(p => p.id);
+    let links = [];
+    if (patchIds.length > 0) {
+      const linksResult = await pool.query(
+        'SELECT from_patch_id, to_patch_id FROM patch_links WHERE from_patch_id = ANY($1::int[]) OR to_patch_id = ANY($1::int[])',
+        [patchIds]
+      );
+      links = linksResult.rows;
+    }
+
+    res.json({ patches, links });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch patches' });
+  }
+});
+
+// Get a single quilt by id
+app.get('/quilts/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await pool.query('SELECT * FROM quilts WHERE id = $1', [id]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Quilt not found' });
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch quilt' });
+  }
+});
+
+// Get the number of patches for a quilt
+app.get('/quilts/:quiltId/patches/count', async (req, res) => {
+  try {
+    const { quiltId } = req.params;
+    const result = await pool.query('SELECT COUNT(*) FROM patches WHERE quilt_id = $1', [quiltId]);
+    res.json({ count: parseInt(result.rows[0].count, 10) });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch patch count' });
+  }
+});
+
+// Get a single patch by id
+app.get('/patches/:patchId', async (req, res) => {
+  try {
+    const { patchId } = req.params;
+    const result = await pool.query('SELECT * FROM patches WHERE id = $1', [patchId]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Patch not found' });
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch patch' });
+  }
+});
+
+// Create a new patch
+app.post('/patches', async (req, res) => {
+  try {
+    const { quilt_id, user_id, title, content_html, parent_patch_id, tags } = req.body;
+    if (!quilt_id || !user_id || !title || !content_html) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+    // Insert the patch
+    const result = await pool.query(
+      `INSERT INTO patches (quilt_id, user_id, title, content_html, created_at, is_published)
+       VALUES ($1, $2, $3, $4, NOW(), true)
+       RETURNING *`,
+      [quilt_id, user_id, title, content_html]
+    );
+    const patch = result.rows[0];
+    // If parent_patch_id is provided, create a link
+    if (parent_patch_id) {
+      await pool.query(
+        'INSERT INTO patch_links (from_patch_id, to_patch_id) VALUES ($1, $2)',
+        [parent_patch_id, patch.id]
+      );
+    }
+    // If tags are provided, insert them into patch_tags
+    if (Array.isArray(tags) && tags.length > 0) {
+      const tagInserts = tags.map(tag =>
+        pool.query(
+          'INSERT INTO patch_tags (patch_id, name) VALUES ($1, $2)',
+          [patch.id, tag]
+        )
+      );
+      await Promise.all(tagInserts);
+    }
+    res.status(201).json(patch);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to create patch' });
   }
 });
 

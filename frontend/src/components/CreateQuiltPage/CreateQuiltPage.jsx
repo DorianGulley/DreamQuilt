@@ -170,20 +170,30 @@ const CreateQuiltPage = () => {
         .filter((tag) => tag.length > 0);
 
       const quiltData = {
-        ...formData,
+        title: formData.title,
+        description: formData.description,
+        category: formData.category,
+        structure: formData.structure,
+        isPublic: formData.isPublic,
         tags: tagsArray,
         creatorId: user?.id,
       };
 
-      console.log("Creating quilt with data:", quiltData);
+      // Make API call to backend
+      const response = await fetch("http://localhost:4000/quilts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(quiltData),
+      });
 
-      // TODO: Replace with actual API call
-      console.log("Creating quilt:", quiltData);
+      if (!response.ok) {
+        throw new Error("Failed to create quilt");
+      }
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      console.log("Quilt created successfully, navigating to home");
+      const createdQuilt = await response.json();
+      console.log("Quilt created successfully:", createdQuilt);
       // Navigate back to home page
       navigate("/home");
     } catch (error) {
