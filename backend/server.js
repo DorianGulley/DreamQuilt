@@ -74,7 +74,7 @@ app.get('/quilts', async (req, res) => {
       // Get all quilts with author username
       const quiltsResult = await pool.query(`
         SELECT 
-          q.id, q.title, q.description, q.category, q.created_at, 
+          q.id, q.title, q.description, q.category, q.created_at, q.user_id,
           u.username AS author
         FROM quilts q
         JOIN users u ON q.user_id = u.id
@@ -338,6 +338,73 @@ app.post('/patches', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to create patch' });
+  }
+});
+
+// Create a new patch suggestion
+app.post('/patch-suggestions', async (req, res) => {
+  try {
+    const { quilt_id, user_id, title, content_html, parent_patch_id, tags } = req.body;
+    if (!quilt_id || !user_id || !title || !content_html) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+    // Insert the patch suggestion
+    const result = await pool.query(
+      `INSERT INTO patch_suggestions (quilt_id, user_id, title, content_html, parent_patch_id, tags, created_at, status)
+       VALUES ($1, $2, $3, $4, $5, $6, NOW(), 'pending')
+       RETURNING *`,
+      [quilt_id, user_id, title, content_html, parent_patch_id || null, JSON.stringify(tags || [])]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to create patch suggestion' });
+  }
+});
+
+// Get pending patch suggestions for a user's quilts
+app.get('/patch-suggestions/pending/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    // Get all quilts owned by this user
+    const quiltsResult = await pool.query(
+      'SELECT id, title FROM quilts WHERE user_id = $1',
+      [userId]
+    );
+    
+    if (quiltsResult.rows.length === 0) {
+      return res.json([]);
+    }
+    
+    const quiltIds = quiltsResult.rows.map(q => q.id);
+    const quiltsById = quiltsResult.rows.reduce((acc, quilt) => {
+      acc[quilt.id] = quilt;
+      return acc;
+    }, {});
+    
+    // Get pending suggestions for these quilts
+    const suggestionsResult = await pool.query(
+      `SELECT ps.id, ps.title, ps.content_html, ps.created_at, ps.quilt_id, ps.parent_patch_id,
+              u.username AS author_name, p.title AS parent_patch_title
+       FROM patch_suggestions ps
+       JOIN users u ON ps.user_id = u.id
+       LEFT JOIN patches p ON ps.parent_patch_id = p.id
+       WHERE ps.quilt_id = ANY($1::int[]) AND ps.status = 'pending'
+       ORDER BY ps.created_at DESC`,
+      [quiltIds]
+    );
+    
+    // Attach quilt information to each suggestion
+    const suggestions = suggestionsResult.rows.map(suggestion => ({
+      ...suggestion,
+      quilt_title: quiltsById[suggestion.quilt_id].title
+    }));
+    
+    res.json(suggestions);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch pending suggestions' });
   }
 });
 

@@ -7,7 +7,8 @@ import HomePage from './components/HomePage/HomePage';
 import CreateQuiltPage from './components/CreateQuiltPage/CreateQuiltPage';
 import ProfilePage from './components/ProfilePage/ProfilePage';
 import CreatePatchPage from "./components/CreatePatchPage/CreatePatchPage";
-import QuiltViewPage from "./components/QuiltViewPage/QuiltViewPage";
+import PublicQuiltViewPage from "./components/QuiltViewPage/PublicQuiltViewPage";
+import OwnerQuiltViewPage from "./components/QuiltViewPage/OwnerQuiltViewPage";
 
 function App() {
   return (
@@ -22,7 +23,8 @@ function App() {
         <Route path="/create-patch/:quiltId" element={<CreatePatchPage />} />
         <Route path="/create-patch" element={<CreatePatchPage />} />
         <Route path="/profile/:username" element={<ProfilePage />} />
-        <Route path="/quilt/:id" element={<QuiltViewPage />} />;
+        <Route path="/quilt/public/:id" element={<PublicQuiltViewPage />} />
+        <Route path="/quilt/owner/:id" element={<OwnerQuiltViewPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Router>

@@ -1,0 +1,71 @@
+# DreamQuilt Database Structure
+---
+## Table: quilts
+- id
+- user_id
+- title
+- description
+- category
+- created_at
+- updated_at
+- structure (enum: linear, nonlinear, hierarchical)
+- public
+
+## Table: quilt_tags
+- id
+- quilt_id
+- tag
+
+## Table: users
+- id
+- username
+- email
+- password
+- bio
+- profile_picture_url
+- created_at
+
+## Table: follows
+- id
+- follower_id
+- followed_user_id
+- followed_quilt_id
+- created_at
+
+## Table: patches
+- id
+- quilt_id
+- user_id
+- title
+- content_html
+- created_at
+- is_published
+
+## Table: patch_images
+- id
+- patch_id
+- url
+- caption
+
+## Table: patch_links
+- id
+- from_patch_id
+- to_patch_id
+
+## Table: patch_tags
+- id
+- patch_id
+- name
+
+## Table: patch_suggestions
+- id
+- quilt_id
+- user_id
+- title
+- content_html
+- created_at
+- status (pending/approved/denied)
+- reviewed_by
+- reviewed_at
+- parent_patch_id
+- tags (JSONB)

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "./HomePage.css";
 import {
@@ -11,6 +11,7 @@ import {
   FaBook,
   FaPalette,
   FaLightbulb,
+  FaBell,
 } from "react-icons/fa";
 import { useUser } from "../../context/UserContext";
 
@@ -31,6 +32,10 @@ const HomePage = () => {
   const [quilts, setQuilts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [loadingNotifications, setLoadingNotifications] = useState(false);
+  const notificationRef = useRef(null);
 
   useEffect(() => {
     // Fetch quilts from backend
@@ -41,6 +46,38 @@ const HomePage = () => {
         console.error("Failed to fetch quilts:", err);
         setQuilts([]);
       });
+  }, []);
+
+  // Fetch pending suggestions when user is logged in
+  useEffect(() => {
+    if (user && user.id) {
+      setLoadingNotifications(true);
+      fetch(`http://localhost:4000/patch-suggestions/pending/${user.id}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setNotifications(data);
+          setLoadingNotifications(false);
+        })
+        .catch((err) => {
+          console.error("Failed to fetch notifications:", err);
+          setNotifications([]);
+          setLoadingNotifications(false);
+        });
+    }
+  }, [user]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(event.target)
+      ) {
+        setShowNotifications(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleCreateQuilt = () => {
@@ -57,6 +94,21 @@ const HomePage = () => {
     } else {
       navigate("/login");
     }
+  };
+
+  const handleNotifications = () => {
+    setShowNotifications(!showNotifications);
+  };
+
+  const formatTimeAgo = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.floor((now - date) / (1000 * 60 * 60));
+
+    if (diffInHours < 1) return "Just now";
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    const diffInDays = Math.floor(diffInHours / 24);
+    return `${diffInDays}d ago`;
   };
 
   const filteredQuilts = quilts.filter((quilt) => {
@@ -97,6 +149,78 @@ const HomePage = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
+
+          {user && (
+            <div className="notification-container" ref={notificationRef}>
+              <button
+                className="notification-btn"
+                onClick={handleNotifications}
+              >
+                <FaBell />
+                {notifications.length > 0 && (
+                  <span className="notification-badge">
+                    {notifications.length}
+                  </span>
+                )}
+              </button>
+              {showNotifications && (
+                <div className="notification-dropdown">
+                  <div className="notification-header">
+                    <h4>Pending Suggestions</h4>
+                    <span className="notification-count">
+                      {notifications.length}
+                    </span>
+                  </div>
+                  <div className="notification-list">
+                    {loadingNotifications ? (
+                      <div className="notification-item loading">
+                        Loading...
+                      </div>
+                    ) : notifications.length === 0 ? (
+                      <div className="notification-item empty">
+                        No pending suggestions
+                      </div>
+                    ) : (
+                      notifications.map((notification) => (
+                        <div
+                          key={notification.id}
+                          className="notification-item"
+                        >
+                          <div className="notification-content">
+                            <div className="notification-title">
+                              {notification.title}
+                            </div>
+                            <div className="notification-details">
+                              <span className="quilt-name">
+                                {notification.quilt_title}
+                              </span>
+                              <span className="author">
+                                by {notification.author_name}
+                              </span>
+                              {notification.parent_patch_title && (
+                                <span className="parent-patch">
+                                  → {notification.parent_patch_title}
+                                </span>
+                              )}
+                            </div>
+                            <div className="notification-preview">
+                              {truncate(
+                                stripHtml(notification.content_html),
+                                100
+                              )}
+                            </div>
+                            <div className="notification-time">
+                              {formatTimeAgo(notification.created_at)}
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="user-controls">
             <button className="create-quilt-btn" onClick={handleCreateQuilt}>
@@ -178,7 +302,11 @@ const HomePage = () => {
                   <div className="quilt-header">
                     <h4>
                       <Link
-                        to={`/quilt/${quilt.id}`}
+                        to={
+                          user && user.id === quilt.user_id
+                            ? `/quilt/owner/${quilt.id}`
+                            : `/quilt/public/${quilt.id}`
+                        }
                         className="quilt-title-link"
                       >
                         {quilt.title}

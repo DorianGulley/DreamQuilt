@@ -33,15 +33,21 @@ const CreatePatchPage = () => {
   const [patchCount, setPatchCount] = useState(null);
   const [parentPatchName, setParentPatchName] = useState("");
   const [loadingHeader, setLoadingHeader] = useState(true);
+  const [quiltOwner, setQuiltOwner] = useState(null);
+  const [isOwner, setIsOwner] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
     setLoadingHeader(true);
-    // Fetch quilt name
+    // Fetch quilt name and owner
     const fetchQuilt = fetch(`http://localhost:4000/quilts/${quiltId}`)
       .then((res) => res.json())
       .then((data) => {
-        if (isMounted) setQuiltName(data.title || "");
+        if (isMounted) {
+          setQuiltName(data.title || "");
+          setQuiltOwner(data.user_id);
+          setIsOwner(user && data.user_id === user.id);
+        }
       });
     // Fetch patch count
     const fetchCount = fetch(
@@ -68,7 +74,7 @@ const CreatePatchPage = () => {
     return () => {
       isMounted = false;
     };
-  }, [quiltId, parentPatchId]);
+  }, [quiltId, parentPatchId, user]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -118,7 +124,8 @@ const CreatePatchPage = () => {
     };
 
     try {
-      const response = await fetch("http://localhost:4000/patches", {
+      const endpoint = isOwner ? "/patches" : "/patch-suggestions";
+      const response = await fetch(`http://localhost:4000${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(patchData),
@@ -128,7 +135,14 @@ const CreatePatchPage = () => {
         throw new Error("Failed to create patch");
       }
 
-      navigate(`/quilt/${quiltId}`);
+      if (isOwner) {
+        navigate(`/quilt/owner/${quiltId}`);
+      } else {
+        alert(
+          "Patch suggestion submitted! It will be reviewed by the quilt owner."
+        );
+        navigate(`/quilt/public/${quiltId}`);
+      }
     } catch (error) {
       alert(error.message || "Error creating patch");
     } finally {
